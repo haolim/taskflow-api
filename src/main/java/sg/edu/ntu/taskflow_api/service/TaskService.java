@@ -1,0 +1,65 @@
+package sg.edu.ntu.taskflow_api.service;
+
+import java.util.List;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.stereotype.Service;
+
+import sg.edu.ntu.taskflow_api.exceptions.TaskNotFoundException;
+import sg.edu.ntu.taskflow_api.model.Task;
+import sg.edu.ntu.taskflow_api.repository.TaskRepository;
+
+@Service
+public class TaskService {
+
+    private final TaskRepository taskRepository;
+    private final ChatClient chatClient;
+
+    public TaskService(TaskRepository taskRepository, ChatClient.Builder chatclientBuilder) {
+        this.taskRepository = taskRepository;
+        this.chatClient = chatclientBuilder.build();
+    }
+
+    public List<Task> findAllTasks() {
+        return taskRepository.getAllTasks();
+    }
+
+    public Task findTaskById(Long id) {
+        return taskRepository.getTaskById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+    }
+
+    public Task createTask(Task task) {
+        return taskRepository.save(task);
+    }
+
+    public Task updateTask(Long id, Task task) {
+        Task taskToUpdate = taskRepository.getTaskById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        taskToUpdate.setIsCompleted(task.getIsCompleted());
+        taskToUpdate.setDescription(task.getDescription());
+        taskToUpdate.setTitle(task.getTitle());
+        return taskRepository.save(taskToUpdate);
+    }
+
+    public void deleteTask(Long id) {
+        taskRepository.deleteTaskById(id);
+    }
+
+    public Task markTaskAsComplete(Long id) {
+        Task taskToMarkAsCompleted = taskRepository.getTaskById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        taskToMarkAsCompleted.setIsCompleted(true);
+        return taskRepository.save(taskToMarkAsCompleted);
+    }
+
+    public String summarizeTasks(List<Task> tasks) {
+        return chatClient.prompt()
+                .user("Give a short summary of which tasks are pending and which are completed: " + tasks)
+                .call()
+                .content();
+    }
+
+}
