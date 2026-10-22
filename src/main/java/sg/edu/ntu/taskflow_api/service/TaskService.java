@@ -30,6 +30,7 @@ public class TaskService {
     }
 
     public Task createTask(Task task) {
+        task.setId(null);
         return taskRepository.save(task);
     }
 
@@ -44,6 +45,8 @@ public class TaskService {
     }
 
     public void deleteTask(Long id) {
+        taskRepository.getTaskById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
         taskRepository.deleteTaskById(id);
     }
 

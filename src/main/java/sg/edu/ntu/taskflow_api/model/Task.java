@@ -1,6 +1,5 @@
 package sg.edu.ntu.taskflow_api.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import lombok.AllArgsConstructor;
@@ -17,11 +16,5 @@ public class Task {
     private String title;
     private String description;
     private Boolean isCompleted = false;
-
-    public Task(String title, String description, boolean isCompleted) {
-        this.title = title;
-        this.description = description;
-        this.isCompleted = isCompleted;
-    }
 
 }
